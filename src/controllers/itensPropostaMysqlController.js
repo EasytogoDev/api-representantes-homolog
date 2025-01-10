@@ -393,16 +393,19 @@ exports.processaItensImportadosViaExcel = async () => {
           proposta.clientePROPOSTA
         );
 
-        if (!produtos || produtos.length === 0) {
+        if (!produtos || produtos.length == 0 || produtos == []) {
           errors.push(
             `Nenhum produto encontrado para o Pedido: ${pedido}, Produto: ${itensNaoProcessados.produtoITEMPROPOSTA}`
           );
 
-          await ItensImportPropostaMysql.destroy({
-            where: {
-              codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
-            },
-          });
+          await ItensImportPropostaMysql.update(
+            { gerouITEMPROPOSTA: 2 },
+            {
+              where: {
+                codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
+              },
+            }
+          );
 
           continue;
         }
@@ -414,8 +417,6 @@ exports.processaItensImportadosViaExcel = async () => {
               partnumberITEMPROPOSTA: itensNaoProcessados.produtoITEMPROPOSTA,
             },
           });
-
-          console.log("Executando produto: ", produto.codigo);
 
           if (buscaSeProdutoJaExiste) {
             console.log(
@@ -436,6 +437,7 @@ exports.processaItensImportadosViaExcel = async () => {
             );
             continue;
           }
+
           const body = {
             proposta: proposta.codigoPROPOSTA,
             produto: produto.codigo,
@@ -464,28 +466,20 @@ exports.processaItensImportadosViaExcel = async () => {
             );
 
             await ItensImportPropostaMysql.update(
-              { gerouITEMPROPOSTA: 1},
+              { gerouITEMPROPOSTA: 1 },
               {
                 where: {
                   codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
                 },
               }
             );
-
-            await ItensImportPropostaMysql.destroy({
-              where: {
-                codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
-              },
-            });
           } catch (error) {
             errors.push(
               "Erro ao criar item para o pedido " + pedido + ": " + error
             );
           }
         }
-        console.log(errors);
       } catch (error) {
-        console.log(errors);
         errors.push(
           "Erro ao buscar dados do produto para o pedido " +
             pedido +
