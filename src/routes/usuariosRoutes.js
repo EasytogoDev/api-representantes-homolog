@@ -63,8 +63,8 @@ const usuariosController = require("../controllers/usuariosControllers");
  *                 type: string
  *                 description: Senha do usuário (sem criptografia)
  *             example:
- *               nome: "saldanha"
- *               senha: "025968"
+ *               nome: "usuario"
+ *               senha: "senha"
  *     responses:
  *       200:
  *         description: Autenticado com sucesso

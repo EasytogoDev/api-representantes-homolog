@@ -132,10 +132,10 @@ module.exports = {
       if (!proposta) {
         return res.status(404).json({ error: "Proposta não encontrada" });
       }
-      await proposta.destroy();
-      res.status(204).send();
+      await proposta.update({ lixeiraPROPOSTA: 1 });
+      return res.status(200).send({mensagem: `Proposta ${codigo} deletada com sucesso!`});
     } catch (error) {
-      res
+      return res
         .status(500)
         .json({ error: "Erro ao deletar proposta: " + error.message });
     }

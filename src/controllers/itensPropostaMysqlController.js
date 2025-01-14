@@ -190,9 +190,13 @@ exports.importarItens = async (req, res) => {
         return res.status(500).send({ error: "Há campos não informado" });
       }
 
+      if (prod.produto.includes("ETE ")) {
+        prod.produto = prod.produto.replace("ETE ", "").trim();
+      }
+
       await ItensImportPropostaMysql.create({
         itemITEMPROPOSTA: index + 1,
-        produtoITEMPROPOSTA: prod.produto,
+        produtoITEMPROPOSTA: prod.produto.trim(),
         quantidadeITEMPROPOSTA: prod.quantidade,
         usuarioITEMPROPOSTA: usuario.codigoVENDEDOR,
         pedidoITEMPROPOSTA: prod.proposta,

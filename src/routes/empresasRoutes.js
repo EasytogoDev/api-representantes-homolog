@@ -107,10 +107,6 @@ const login = require("../middleware/login");
  *       500:
  *         description: Erro ao buscar dados das empresas
  */
-router.get("/", login.required, Empresas.getAll);
-
-
-
 
 /**
  * @swagger
@@ -198,13 +194,17 @@ router.get("/", login.required, Empresas.getAll);
  *                       tipo_email:
  *                         type: string
  *                         description: Tipo de email
+ *                 cpgto:
+ *                   type: array
+ *                   description: Lista de condições de pagamento padrão
+ *                 listas:
+ *                   type: array
+ *                   description: Listas padrão associadas à empresa
  *       404:
  *         description: Empresa não encontrada
  *       500:
  *         description: Erro ao buscar os dados da empresa
  */
-
-router.get("/:codigo", login.required, Empresas.getByCodigo);
 
 /**
  * @swagger
@@ -259,116 +259,17 @@ router.get("/:codigo", login.required, Empresas.getByCodigo);
  *       500:
  *         description: Erro ao buscar dados dos fornecedores
  */
+
+// Outras rotas mantêm estrutura similar
+
+router.get("/", login.required, Empresas.getAll);
+
+router.get("/:codigo", login.required, Empresas.getByCodigo);
+
 router.get("/fornecedores", login.required, Empresas.getFornecedores);
 
-/**
- * @swagger
- * /api/empresas/transportadoras:
- *   get:
- *     summary: Obtém todas as transportadoras
- *     tags: [Empresas]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Número máximo de resultados a serem retornados
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *         description: Número de resultados a pular antes de retornar a lista
- *     responses:
- *       200:
- *         description: Lista de transportadoras
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   codigo:
- *                     type: integer
- *                     description: Código da empresa
- *                   FANTASIA:
- *                     type: string
- *                     description: Nome fantasia da empresa
- *                   RAZAO:
- *                     type: string
- *                     description: Razão social da empresa
- *                   CNPJ:
- *                     type: string
- *                     description: CNPJ da empresa
- *                   PASTA:
- *                     type: integer
- *                     description: Código da pasta da empresa
- *                   DATA:
- *                     type: string
- *                     format: date-time
- *                     description: Data de criação da empresa
- *       500:
- *         description: Erro ao buscar dados das transportadoras
- */
 router.get("/transportadoras", login.required, Empresas.getTransportadoras);
 
-/**
- * @swagger
- * /api/empresas/clientes:
- *   get:
- *     summary: Obtém todos os clientes
- *     tags: [Empresas]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Número máximo de resultados a serem retornados
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *           default: 0
- *         description: Número de resultados a pular antes de retornar a lista
- *     responses:
- *       200:
- *         description: Lista de clientes
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   codigo:
- *                     type: integer
- *                     description: Código da empresa
- *                   FANTASIA:
- *                     type: string
- *                     description: Nome fantasia da empresa
- *                   RAZAO:
- *                     type: string
- *                     description: Razão social da empresa
- *                   CNPJ:
- *                     type: string
- *                     description: CNPJ da empresa
- *                   PASTA:
- *                     type: integer
- *                     description: Código da pasta da empresa
- *                   DATA:
- *                     type: string
- *                     format: date-time
- *                     description: Data de criação da empresa
- *       500:
- *         description: Erro ao buscar dados dos clientes
- */
 router.get("/clientes", login.required, Empresas.getClientes);
 
 module.exports = router;
