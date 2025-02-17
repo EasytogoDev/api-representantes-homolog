@@ -17,7 +17,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `${process.env.URL}:${process.env.PORT}`
+        url: `https://apirepresentanteshomolog.gruporainha.com.br`
       },
     ],
     components: {
