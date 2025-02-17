@@ -486,6 +486,7 @@ exports.criarPropostaSistema = async (req, res) => {
       const procedureQuery = `EXEC sps1601_Insere_Proposta_Web_rainha ?`;
       await sqlServerKnex.raw(procedureQuery, [novaPropostaId]);
     } catch (error) {
+      console.log(error)
       return res.status(500).send("Erro ao executar procedure");
     }
 

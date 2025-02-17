@@ -1,61 +1,51 @@
 {
-    "cSpell.words": [
-        "partnumber",
-        "produto",
-        "Proposta",
-        "tipo"
-    ]
+  "cSpell.words": ["partnumber", "produto", "Proposta", "tipo"],
 
   "editor.tokenColorCustomizations": {
-  "textMateRules": [
-    {
-      "scope": [
-        "string.quoted.single",
-        "string.quoted.double",
-        "string.template"
-      ],
-      "settings": {
-        "foreground": "#DFD880" // Cor para strings (texto dentro das aspas e crases)
+    "textMateRules": [
+      {
+        "scope": [
+          "string.quoted.single",
+          "string.quoted.double",
+          "string.template"
+        ],
+        "settings": {
+          "foreground": "#DFD880" // Cor para strings (texto dentro das aspas e crases)
+        }
+      },
+      {
+        "scope": [
+          "punctuation.definition.string.begin",
+          "punctuation.definition.string.end"
+        ],
+        "settings": {
+          "foreground": "#DFD880" // Cor para aspas simples, duplas e crases
+        }
+      },
+      {
+        "scope": [
+          "punctuation.definition.template-expression.begin",
+          "punctuation.definition.template-expression.end"
+        ],
+        "settings": {
+          "foreground": "#DFD880" // Cor para os delimitadores ${} em template strings
+        }
+      },
+      {
+        "scope": [
+          "variable.other.readwrite.template",
+          "meta.template.expression"
+        ],
+        "settings": {
+          "foreground": "#DFD880" // Cor para variáveis interpoladas dentro de template strings
+        }
+      },
+      {
+        "scope": ["string.template", "punctuation.definition.string.template"],
+        "settings": {
+          "foreground": "#DFD880" // Cor para as crases (`` ` ``) de template strings
+        }
       }
-    },
-    {
-      "scope": [
-        "punctuation.definition.string.begin",
-        "punctuation.definition.string.end"
-      ],
-      "settings": {
-        "foreground": "#DFD880" // Cor para aspas simples, duplas e crases
-      }
-    },
-    {
-      "scope": [
-        "punctuation.definition.template-expression.begin",
-        "punctuation.definition.template-expression.end"
-      ],
-      "settings": {
-        "foreground": "#DFD880" // Cor para os delimitadores ${} em template strings
-      }
-    },
-    {
-      "scope": [
-        "variable.other.readwrite.template",
-        "meta.template.expression"
-      ],
-      "settings": {
-        "foreground": "#DFD880" // Cor para variáveis interpoladas dentro de template strings
-      }
-    },
-    {
-      "scope": [
-        "string.template",
-        "punctuation.definition.string.template"
-      ],
-      "settings": {
-        "foreground": "#DFD880" // Cor para as crases (`` ` ``) de template strings
-      }
-    }
-  ]
-}
-
-
+    ]
+  }
 }

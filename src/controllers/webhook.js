@@ -202,3 +202,47 @@ exports.webhookOP = async (req, res) => {
   }
 };
 
+exports.alterarStatusWMSPara1 = async (req, res) => {
+  const { codigo } = req.params;
+  try {
+    const busca = `
+      SELECT *
+      FROM tb1301_Producao 
+      WHERE codigoPRODUCAO = ?
+    `;
+
+    const resultadoBusca = await sqlServerConfig.raw(busca, [codigo]);
+
+    const status = resultadoBusca.map((result) => {
+      result.wmsPRODUCAO;
+    });
+
+    if (status === 0) {
+      const update = `
+      UPDATE tb1301_Producao 
+      SET wmsPRODUCAO
+      WHERE codigoPRODUCAO = ?
+  `;
+
+      const resultadoUpdate = await sqlServerConfig.raw(update, [codigo]);
+      return res.send({ status: true, resultadoUpdate });
+    } else if (status === 2) {
+      return res.send({
+        status: false,
+        mensagem: `OP ${codigo} processado no estoque!`,
+      });
+    } else if (status === 3) {
+      return res.send({
+        status: false,
+        mensagem: `A OP ${codigo} está com divergência.`,
+      });
+    } else if (status === 4) {
+      return res.send({
+        status: false,
+        mensagem: `A OP ${codigo} já está finalizada.`,
+      });
+    }
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+};

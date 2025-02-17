@@ -11,7 +11,7 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: "3.0.0",
     info: {
-      title: "API RAINHA DAS SETE",
+      title: "API RAINHA DAS SETE - ITATIBA",
       version: "1.0.0",
       description: "Sistema ERP Interno",
     },

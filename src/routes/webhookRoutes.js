@@ -84,7 +84,6 @@ const login = require("../middleware/login"); // Middleware de autenticação
  *                   type: string
  *                   example: "Erro ao criar a proposta."
  */
-router.post("/vendas", login.required, webhookController.webhookVendas);
 
 /**
  * @swagger
@@ -160,7 +159,6 @@ router.post("/vendas", login.required, webhookController.webhookVendas);
  *                   type: string
  *                   example: "Erro ao criar a proposta."
  */
-router.post("/compras", login.required, webhookController.webhookCompras);
 
 /**
  * @swagger
@@ -236,6 +234,49 @@ router.post("/compras", login.required, webhookController.webhookCompras);
  *                   type: string
  *                   example: "Erro ao criar a proposta."
  */
+
+/**
+ * @swagger
+ * /api/retorno/alterar-status/{codigo}:
+ *   post:
+ *     summary: Alterar status do WMS para 1
+ *     description: Atualiza o status do WMS da OP para 1, se aplicável, e retorna mensagens específicas dependendo do estado atual.
+ *     tags: [Webhook]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: codigo
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Código da produção a ser atualizada.
+ *     responses:
+ *       '200':
+ *         description: Status alterado com sucesso ou mensagem específica do estado atual da OP.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: boolean
+ *                   description: Indica se a alteração foi bem-sucedida.
+ *                   example: true
+ *                 mensagem:
+ *                   type: string
+ *                   description: Mensagem sobre o estado da OP.
+ *                   example: "OP 12345 processado no estoque!"
+ *       '500':
+ *         description: Erro interno do servidor.
+ */
+
+router.post("/vendas", login.required, webhookController.webhookVendas);
+
+router.post("/compras", login.required, webhookController.webhookCompras);
+
 router.post("/op", login.required, webhookController.webhookOP);
+
+router.post("/alterar-status/:codigo", webhookController.alterarStatusWMSPara1);
 
 module.exports = router;

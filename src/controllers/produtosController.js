@@ -90,7 +90,7 @@ exports.BuscarUmPorCodigoProduto = async (codigo) => {
   } catch (error) {
     return { status: false, error };
   }
-}; *//* 
+}; */ /* 
 exports.getProdutoData = async (req, res) => {
   const offset = parseInt(req.query.offset) || 0;
   const limit = parseInt(req.query.limit) || 100;
@@ -231,19 +231,19 @@ exports.getProdutoData = async (req, res) => {
               pathIMAGEMPRODUTO AS IMAGEMPRODUTO,
               qtddisponivelESTOQUE AS QuantidadeDisponível 
           FROM tb0501_Produtos
-          INNER JOIN tb0505_Unidades_Medidas ON codigoUNIDADEMEDIDA = undprincipalPRODUTO
-          INNER JOIN tb0001_Pastas ON codigoPASTA = pastaPRODUTO
-          INNER JOIN tb0504_Embalagens_Produtos ON codigoPRODUTO = produtoEMBALAGEMPRODUTO AND padraoEMBALAGEMPRODUTO = 1
-          INNER JOIN tb0545_Embalagens ON codigoEMBALAGEM = embalagemEMBALAGEMPRODUTO
-          INNER JOIN tb0509_Produtos_Lista ON codigoPRODUTO = produtoPRODUTOLISTA
-          INNER JOIN tb0508_Listas ON codigoLISTA = listaPRODUTOLISTA
-          INNER JOIN tb0520_Imagens_Produtos ON codigoPRODUTO = produtosIMAGEMPRODUTO
-          INNER JOIN tb0507_CF ON cfPRODUTO = codigoCF
-          INNER JOIN tb1201_Estoque ON codigoPRODUTO = produtoESTOQUE 
-          INNER JOIN tb0316_Listas ON listaEMPRESALISTA = codigoLISTA AND padraoEMPRESALISTA = 1
-          INNER JOIN tb1616_Carteiras ON empresaEMPRESALISTA = empresaCARTEIRA
-          INNER JOIN tb1609_Vendedores ON codigoVENDEDOR = vendedorCARTEIRA
-		      INNER JOIN tb0206_Pastas ON usuarioassociadoVENDEDOR = usuarioUSUARIOPASTA AND pastaUSUARIOPASTA = codigoPASTA AND valorUSUARIOPASTA = 1
+          LEFT JOIN tb0505_Unidades_Medidas ON codigoUNIDADEMEDIDA = undprincipalPRODUTO
+          LEFT JOIN tb0001_Pastas ON codigoPASTA = pastaPRODUTO
+          LEFT JOIN tb0504_Embalagens_Produtos ON codigoPRODUTO = produtoEMBALAGEMPRODUTO AND padraoEMBALAGEMPRODUTO = 1
+          LEFT JOIN tb0545_Embalagens ON codigoEMBALAGEM = embalagemEMBALAGEMPRODUTO
+          LEFT JOIN tb0509_Produtos_Lista ON codigoPRODUTO = produtoPRODUTOLISTA
+          LEFT JOIN tb0508_Listas ON codigoLISTA = listaPRODUTOLISTA
+          LEFT JOIN tb0520_Imagens_Produtos ON codigoPRODUTO = produtosIMAGEMPRODUTO
+          LEFT JOIN tb0507_CF ON cfPRODUTO = codigoCF
+          LEFT JOIN tb1201_Estoque ON codigoPRODUTO = produtoESTOQUE 
+          LEFT JOIN tb0316_Listas ON listaEMPRESALISTA = codigoLISTA AND padraoEMPRESALISTA = 1
+          LEFT JOIN tb1616_Carteiras ON empresaEMPRESALISTA = empresaCARTEIRA
+          LEFT JOIN tb1609_Vendedores ON codigoVENDEDOR = vendedorCARTEIRA
+		      LEFT JOIN tb0206_Pastas ON usuarioassociadoVENDEDOR = usuarioUSUARIOPASTA AND pastaUSUARIOPASTA = codigoPASTA AND valorUSUARIOPASTA = 1
           WHERE lixeiraPRODUTO = 0 
             AND descontinuadoPRODUTO = 0 
             AND descontinuarPRODUTO = 0 
@@ -253,8 +253,8 @@ exports.getProdutoData = async (req, res) => {
 
   // Adiciona o filtro do produto se fornecido
   if (produto) {
-    query += ` AND partnumberPRODUTO LIKE ? `;
-    bindings.push(`${produto}%`);
+    query += ` AND partnumberPRODUTO LIKE '%${produto}%'`;
+    // bindings.push(`${produto}%`);
   }
 
   // Adiciona os outros filtros obrigatórios
@@ -290,10 +290,12 @@ exports.getProdutoData = async (req, res) => {
 
     // Formatação do resultado, se necessário
     const formattedResult = result.map((row) => {
-      const imagem = row.IMAGEMPRODUTO.replace(
-        "\\\\192.168.40.5\\Tecware\\Site\\Fotos\\Fotos\\",
-        "https://intranet.gruporainhadassete.com.br/Fotos/Fotos/"
-      );
+      if (row.IMAGEMPRODUTO) {
+        var imagem = row.IMAGEMPRODUTO.replace(
+          "\\\\192.168.50.5\\Tecware\\Site\\Fotos\\Fotos\\",
+          "https://intranet.gruporainhadassete.com.br/Fotos/Fotos/"
+        );
+      }
       return {
         ...row,
         IMAGEMPRODUTO: imagem,
@@ -307,8 +309,6 @@ exports.getProdutoData = async (req, res) => {
   }
 };
 
-
- 
 /* 
 exports.buscarArvoresDeProdutos = async (req, res) => {
   const { produto } = req.params;
@@ -443,4 +443,3 @@ exports.buscarTabelaDePrecos = async (req, res) => {
     return res.status(500).send(error);
   }
 }; */
-

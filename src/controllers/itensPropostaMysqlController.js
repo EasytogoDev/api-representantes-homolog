@@ -7,6 +7,7 @@ const {
 } = require("../models");
 const { userIsSeller } = require("./empresasController");
 const { sqlServerKnex } = require("../config/sqlserver");
+const { config } = require("dotenv");
 
 // Busca itens por proposta
 exports.getByProposta = async (req, res) => {
@@ -155,18 +156,15 @@ exports.update = async (req, res) => {
   }
 };
 
-// Deleta um item por ID
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
     const item = await ItensPropostaMysql.findByPk(id);
 
-    // Verifica se o item existe
     if (!item) {
       return res.status(404).json({ error: "Item não encontrado" });
     }
 
-    // Deleta o item
     await item.destroy();
     res.status(204).send();
   } catch (error) {
@@ -177,8 +175,6 @@ exports.delete = async (req, res) => {
 exports.importarItens = async (req, res) => {
   const json = req.body;
   const usuario = await userIsSeller(req);
-
-  // console.log(json);
 
   try {
     const itens = json.forEach(async (prod, index) => {
@@ -354,7 +350,7 @@ const getProdutoData = async (produto, vendedor, empresa) => {
   try {
     const result = await sqlServerKnex.raw(query, [produto, empresa, vendedor]);
 
-    console.log(result);
+    // console.log(result);
     return result;
   } catch (error) {
     console.error("Erro ao buscar dados do produto:", error);
@@ -369,7 +365,7 @@ exports.processaItensImportadosViaExcel = async () => {
     });
 
     if (!buscaItensNaoProcessados || buscaItensNaoProcessados.length === 0) {
-      console.log("Nenhum item pendente");
+      console.log("-> Nenhum item pendente");
       return { mensagem: "Nenhum item pendente" };
     }
 
@@ -378,6 +374,7 @@ exports.processaItensImportadosViaExcel = async () => {
     for (let itensNaoProcessados of buscaItensNaoProcessados) {
       let pedido = itensNaoProcessados.pedidoITEMPROPOSTA;
       let proposta;
+
 
       try {
         proposta = await PropostasMYSQL.findByPk(pedido);
@@ -390,16 +387,45 @@ exports.processaItensImportadosViaExcel = async () => {
         continue; // Pular para o próximo item sem retornar resposta
       }
 
-      try {
-        var produtos = await getProdutoData(
-          itensNaoProcessados.produtoITEMPROPOSTA,
-          proposta.vendedorPROPOSTA,
-          proposta.clientePROPOSTA
+      
+      var produtos = await getProdutoData(
+        itensNaoProcessados.produtoITEMPROPOSTA,
+        proposta.vendedorPROPOSTA,
+        proposta.clientePROPOSTA
+      );
+      
+      if (!produtos || produtos.length == 0 ) {
+        errors.push(
+          `Nenhum produto encontrado para o Pedido: ${pedido}, Produto: ${itensNaoProcessados.produtoITEMPROPOSTA}`
         );
+        
+        await ItensImportPropostaMysql.update(
+          { gerouITEMPROPOSTA: 2 },
+          {
+            where: {
+              codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
+            },
+          }
 
-        if (!produtos || produtos.length == 0 || produtos == []) {
-          errors.push(
-            `Nenhum produto encontrado para o Pedido: ${pedido}, Produto: ${itensNaoProcessados.produtoITEMPROPOSTA}`
+        );
+        
+        continue;
+      }
+      
+      for (let produto of produtos) {
+        // const buscaSeProdutoJaExiste = await ItensImportPropostaMysql.findOne(
+          const buscaSeProdutoJaExiste = await ItensPropostaMysql.findOne({
+            where: {
+              propostaITEMPROPOSTA: itensNaoProcessados.pedidoITEMPROPOSTA,
+              partnumberITEMPROPOSTA: itensNaoProcessados.produtoITEMPROPOSTA,
+            },
+          });
+          // console.log("PRODUTO JÁ EXISTE: ", buscaSeProdutoJaExiste);
+          // continue;
+
+        if (buscaSeProdutoJaExiste) {
+          console.log(
+            `O produto ${itensNaoProcessados.produtoITEMPROPOSTA} já existe na proposta ${itensNaoProcessados.pedidoITEMPROPOSTA}`
           );
 
           await ItensImportPropostaMysql.update(
@@ -410,97 +436,74 @@ exports.processaItensImportadosViaExcel = async () => {
               },
             }
           );
-
+          
+          errors.push(
+            `O produto ${itensNaoProcessados.codigoITEMPROPOSTA} está duplicado no excel importado, portanto estamos removendo as duplicatas`
+          );
           continue;
         }
 
-        for (let produto of produtos) {
-          const buscaSeProdutoJaExiste = await ItensPropostaMysql.findOne({
-            where: {
-              propostaITEMPROPOSTA: itensNaoProcessados.pedidoITEMPROPOSTA,
-              partnumberITEMPROPOSTA: itensNaoProcessados.produtoITEMPROPOSTA,
-            },
-          });
+        let body = {
+          proposta: proposta.codigoPROPOSTA,
+          produto: produto.codigo,
+          partnumber: produto.sku,
+          nomeitem: produto.Descricao,
+          quantidade: itensNaoProcessados.quantidadeITEMPROPOSTA,
+          embalagempadrao: produto.quantidadeEMBALAGEMPRODUTO,
+          unidade: produto.UN,
+          valor: produto.precoPRODUTOLISTA,
+          ipi: produto.IPI,
+          ativo: 1,
+        };
 
-          if (buscaSeProdutoJaExiste) {
-            console.log(
-              `O produto ${itensNaoProcessados.produtoITEMPROPOSTA} já existe na proposta ${itensNaoProcessados.pedidoITEMPROPOSTA}`
-            );
-
-            await ItensImportPropostaMysql.update(
-              { gerouITEMPROPOSTA: 2 },
-              {
-                where: {
-                  codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
-                },
-              }
-            );
-
-            errors.push(
-              `O produto ${itensNaoProcessados.codigoITEMPROPOSTA} está duplicado no excel importado, portanto estamos removendo as duplicatas`
-            );
-            continue;
-          }
-
-          const body = {
-            proposta: proposta.codigoPROPOSTA,
-            produto: produto.codigo,
-            partnumber: produto.sku,
-            nomeitem: produto.Descricao,
-            quantidade: itensNaoProcessados.quantidadeITEMPROPOSTA,
-            embalagempadrao: produto.quantidadeEMBALAGEMPRODUTO,
-            unidade: produto.UN,
-            valor: produto.precoPRODUTOLISTA,
-            ipi: produto.IPI,
-            ativo: 1,
-          };
-
-          try {
-            await this.criar(
-              body.proposta,
-              body.produto,
-              body.partnumber,
-              body.nomeitem,
-              body.quantidade,
-              body.embalagempadrao,
-              body.unidade,
-              body.valor,
-              body.ipi,
-              body.ativo
-            );
-
-            await ItensImportPropostaMysql.update(
-              { gerouITEMPROPOSTA: 1 },
-              {
-                where: {
-                  codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
-                },
-              }
-            );
-          } catch (error) {
-            errors.push(
-              "Erro ao criar item para o pedido " + pedido + ": " + error
-            );
-          }
+        try {
+          await this.criar(
+            body.proposta,
+            body.produto,
+            body.partnumber,
+            body.nomeitem,
+            body.quantidade,
+            body.embalagempadrao,
+            body.unidade,
+            body.valor,
+            body.ipi,
+            body.ativo
+          );
+  
+          await ItensImportPropostaMysql.update(
+            { gerouITEMPROPOSTA: 1 },
+            {
+              where: {
+                codigoITEMPROPOSTA: itensNaoProcessados.codigoITEMPROPOSTA,
+              },
+            }
+          );
+        } catch (error) {
+          errors.push(`${body.proposta} Não atualizado`);
+          continue;
         }
-      } catch (error) {
-        errors.push(
-          "Erro ao buscar dados do produto para o pedido " +
-            pedido +
-            ": " +
-            error
-        );
       }
     }
 
     // Após o laço, se houve erros, retornamos uma resposta de erro com as mensagens acumuladas
-    if (errors.length > 0) {
-      return { errors };
-    }
+    // if (errors.length > 0) {
+    //   return { errors };
+    // }
 
     // Caso tudo tenha sido processado corretamente
     return { mensagem: "Processamento concluído com sucesso.", errors };
   } catch (error) {
     return "Erro inesperado: " + error;
+  }
+};
+
+exports.deletaItensTabelaTemporaria = async () => {
+  console.log("Deletando todos os itens da tabela temporária!");
+  try {
+    await ItensImportPropostaMysql.delete();
+    console.log("Itens deletados com sucesso!");
+    return;
+  } catch (error) {
+    return error;
   }
 };
